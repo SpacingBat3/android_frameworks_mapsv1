@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-def BUILD_TOOLS_VERSION = "23.0.2"
+def BUILD_TOOLS_VERSION = "33.0.1"
 def ANDROID_SDK_DIR = System.env.ANDROID_HOME
 
 Properties properties = new Properties()
@@ -33,8 +33,8 @@ if (!ANDROID_SDK_DIR) {
 if (!file(ANDROID_SDK_DIR).exists()) {
     println "Android SDK not found at '$ANDROID_SDK_DIR', either set ANDROID_HOME environment variable or configure 'sdk.dir' in local.properties."
 }
-def BUILD_TOOLS_DX = "$ANDROID_SDK_DIR/build-tools/$BUILD_TOOLS_VERSION/dx"
-if (!file(BUILD_TOOLS_DX).exists()) {
+def BUILD_TOOLS_D8 = "$ANDROID_SDK_DIR/build-tools/$BUILD_TOOLS_VERSION/d8"
+if (!file(BUILD_TOOLS_D8).exists()) {
     println "Could not find build tools $BUILD_TOOLS_VERSION in Android SDK."
 }
 
@@ -76,10 +76,11 @@ task prepareFrameworkDex(type: Copy, dependsOn: ':mapsv1-compat-osmdroid:assembl
 }
 
 task frameworkDex(type: Exec, dependsOn: prepareFrameworkDex) {
-    executable "${BUILD_TOOLS_DX}"
-    args "--dex"
-    args "--output="+file('build/intermediates/bundle/classes.dex').path
-    args file('build/intermediates/classes').path
+    executable "${BUILD_TOOLS_D8}"
+    //args "--dex"
+    args "--output"
+    args file('build/intermediates/bundle').path
+    args fileTree(dir: 'build/intermediates/classes', include:'**/*.class').getFiles()
 }
 
 task frameworkJar(type: Jar, dependsOn: frameworkDex) {
